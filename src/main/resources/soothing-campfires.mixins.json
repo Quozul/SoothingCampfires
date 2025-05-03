@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "dev.quozul.campfire.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "CampfireBlockEntityMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+	}
+}
