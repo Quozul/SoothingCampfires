@@ -2,27 +2,31 @@ package dev.quozul.campfire;
 
 import net.fabricmc.api.ModInitializer;
 
-import net.fabricmc.fabric.api.gamerule.v1.GameRuleFactory;
-import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry;
-import net.minecraft.world.GameRules;
+import net.fabricmc.fabric.api.gamerule.v1.GameRuleBuilder;
+import net.minecraft.util.Identifier;
+import net.minecraft.world.rule.GameRule;
+import net.minecraft.world.rule.GameRuleCategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SoothingCampfires implements ModInitializer {
-	public static final String MOD_ID = "soothing-campfires";
+    public static final String MOD_ID = "soothing_campfires";
 
-	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	public static final GameRules.Key<GameRules.IntRule> CAMPFIRE_REGENERATION_DURATION =
-			GameRuleRegistry.register("campfireRegenerationDuration", GameRules.Category.MISC, GameRuleFactory.createIntRule(100));
+    public static final GameRule<Integer> CAMPFIRE_REGENERATION_DURATION = GameRuleBuilder.forInteger(100)
+            .category(GameRuleCategory.MISC)
+            .buildAndRegister(Identifier.of(MOD_ID, "duration"));
 
-	public static final GameRules.Key<GameRules.IntRule> CAMPFIRE_REGENERATION_RADIUS =
-			GameRuleRegistry.register("campfireRegenerationRadius", GameRules.Category.MISC, GameRuleFactory.createIntRule(5));
+    public static final GameRule<Integer> CAMPFIRE_REGENERATION_RADIUS = GameRuleBuilder.forInteger(5)
+            .category(GameRuleCategory.MISC)
+            .buildAndRegister(Identifier.of(MOD_ID, "radius"));
 
-	public static final GameRules.Key<GameRules.IntRule> CAMPFIRE_REGENERATION_AMPLIFIER =
-			GameRuleRegistry.register("campfireRegenerationAmplifier", GameRules.Category.MISC, GameRuleFactory.createIntRule(0));
+    public static final GameRule<Integer> CAMPFIRE_REGENERATION_AMPLIFIER = GameRuleBuilder.forInteger(0)
+            .category(GameRuleCategory.MISC)
+            .buildAndRegister(Identifier.of(MOD_ID, "amplifier"));
 
-	@Override
-	public void onInitialize() {
-	}
+    @Override
+    public void onInitialize() {
+    }
 }

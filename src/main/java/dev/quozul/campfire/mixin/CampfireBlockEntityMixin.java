@@ -13,7 +13,7 @@ import net.minecraft.recipe.input.SingleStackRecipeInput;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.world.GameRules;
+import net.minecraft.world.rule.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -27,7 +27,7 @@ public class CampfireBlockEntityMixin {
     private static void addCampfireRegenerationEffect(ServerWorld world, BlockPos pos, BlockState state, CampfireBlockEntity blockEntity, ServerRecipeManager.MatchGetter<SingleStackRecipeInput, CampfireCookingRecipe> recipeMatchGetter, CallbackInfo ci, @Local boolean bl) {
         if (bl) {
             GameRules gameRules = world.getGameRules();
-            int radius = gameRules.getInt(SoothingCampfires.CAMPFIRE_REGENERATION_RADIUS);
+            int radius = gameRules.getValue(SoothingCampfires.CAMPFIRE_REGENERATION_RADIUS);
             Box effectArea = new Box(pos).expand(radius);
             List<PlayerEntity> players = world.getNonSpectatingEntities(PlayerEntity.class, effectArea);
 
@@ -38,8 +38,8 @@ public class CampfireBlockEntityMixin {
                 }
 
                 if (currentEffect == null || currentEffect.getDuration() < 20) {
-                    int duration = gameRules.getInt(SoothingCampfires.CAMPFIRE_REGENERATION_DURATION);
-                    int amplifier = gameRules.getInt(SoothingCampfires.CAMPFIRE_REGENERATION_AMPLIFIER);
+                    int duration = gameRules.getValue(SoothingCampfires.CAMPFIRE_REGENERATION_DURATION);
+                    int amplifier = gameRules.getValue(SoothingCampfires.CAMPFIRE_REGENERATION_AMPLIFIER);
                     player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, duration, amplifier, true, true));
                 }
             }
