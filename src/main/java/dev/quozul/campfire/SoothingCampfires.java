@@ -22,6 +22,10 @@ public class SoothingCampfires implements ModInitializer {
             .category(GameRuleCategory.MISC)
             .buildAndRegister(Identifier.of(MOD_ID, "radius"));
 
+    public static final GameRule<Integer> CAMPFIRE_REGENERATION_RADIUS_SIGNAL = GameRuleBuilder.forInteger(10)
+            .category(GameRuleCategory.MISC)
+            .buildAndRegister(Identifier.of(MOD_ID, "signal_radius"));
+
     public static final GameRule<Integer> CAMPFIRE_REGENERATION_AMPLIFIER = GameRuleBuilder.forInteger(0)
             .category(GameRuleCategory.MISC)
             .buildAndRegister(Identifier.of(MOD_ID, "amplifier"));

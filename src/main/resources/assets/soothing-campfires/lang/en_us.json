@@ -1,5 +1,6 @@
 {
   "gamerule.soothing_campfires.duration": "Campfire regeneration duration",
   "gamerule.soothing_campfires.radius": "Campfire regeneration radius",
+  "gamerule.soothing_campfires.signal_radius": "Campfire regeneration signal radius",
   "gamerule.soothing_campfires.amplifier": "Campfire regeneration amplifier"
 }

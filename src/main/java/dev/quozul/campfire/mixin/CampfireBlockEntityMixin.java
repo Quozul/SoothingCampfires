@@ -3,6 +3,7 @@ package dev.quozul.campfire.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.quozul.campfire.SoothingCampfires;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.CampfireBlockEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -26,8 +27,9 @@ public class CampfireBlockEntityMixin {
     @Inject(method = "litServerTick", at = @At("RETURN"))
     private static void addCampfireRegenerationEffect(ServerWorld world, BlockPos pos, BlockState state, CampfireBlockEntity blockEntity, ServerRecipeManager.MatchGetter<SingleStackRecipeInput, CampfireCookingRecipe> recipeMatchGetter, CallbackInfo ci, @Local boolean bl) {
         if (bl) {
+            boolean isSignal = world.getBlockState(pos.down()).isOf(Blocks.HAY_BLOCK);
             GameRules gameRules = world.getGameRules();
-            int radius = gameRules.getValue(SoothingCampfires.CAMPFIRE_REGENERATION_RADIUS);
+            int radius = gameRules.getValue(isSignal ? SoothingCampfires.CAMPFIRE_REGENERATION_RADIUS_SIGNAL : SoothingCampfires.CAMPFIRE_REGENERATION_RADIUS);
             Box effectArea = new Box(pos).expand(radius);
             List<PlayerEntity> players = world.getNonSpectatingEntities(PlayerEntity.class, effectArea);
 
