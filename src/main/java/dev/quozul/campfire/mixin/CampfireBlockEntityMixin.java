@@ -2,20 +2,22 @@ package dev.quozul.campfire.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.quozul.campfire.SoothingCampfires;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.CampfireBlockEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.recipe.CampfireCookingRecipe;
-import net.minecraft.recipe.ServerRecipeManager;
-import net.minecraft.recipe.input.SingleStackRecipeInput;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.world.rule.GameRules;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.crafting.CampfireCookingRecipe;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.CampfireBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -24,27 +26,34 @@ import java.util.List;
 
 @Mixin(CampfireBlockEntity.class)
 public class CampfireBlockEntityMixin {
-    @Inject(method = "litServerTick", at = @At("RETURN"))
-    private static void addCampfireRegenerationEffect(ServerWorld world, BlockPos pos, BlockState state, CampfireBlockEntity blockEntity, ServerRecipeManager.MatchGetter<SingleStackRecipeInput, CampfireCookingRecipe> recipeMatchGetter, CallbackInfo ci, @Local boolean bl) {
-        if (bl) {
-            boolean isSignal = world.getBlockState(pos.down()).isOf(Blocks.HAY_BLOCK);
-            GameRules gameRules = world.getGameRules();
-            int radius = gameRules.getValue(isSignal ? SoothingCampfires.CAMPFIRE_REGENERATION_RADIUS_SIGNAL : SoothingCampfires.CAMPFIRE_REGENERATION_RADIUS);
-            Box effectArea = new Box(pos).expand(radius);
-            List<PlayerEntity> players = world.getNonSpectatingEntities(PlayerEntity.class, effectArea);
+    @Inject(method = "cookTick", at = @At("RETURN"))
+    private static void addCampfireRegenerationEffect(ServerLevel level, BlockPos pos, BlockState state, CampfireBlockEntity entity, RecipeManager.CachedCheck<SingleRecipeInput, CampfireCookingRecipe> recipeCache, CallbackInfo ci, @Local(name = "changed") boolean changed) {
+        if (changed) {
+            AABB effectArea = getEffectArea(level, pos);
+            List<Player> players = level.getEntitiesOfClass(Player.class, effectArea);
 
-            for (PlayerEntity player : players) {
-                StatusEffectInstance currentEffect = player.getStatusEffect(StatusEffects.REGENERATION);
+            for (Player player : players) {
+                MobEffectInstance currentEffect = player.getEffect(MobEffects.REGENERATION);
                 if (currentEffect != null && currentEffect.getAmplifier() > 0) {
                     continue;
                 }
 
                 if (currentEffect == null || currentEffect.getDuration() < 20) {
-                    int duration = gameRules.getValue(SoothingCampfires.CAMPFIRE_REGENERATION_DURATION);
-                    int amplifier = gameRules.getValue(SoothingCampfires.CAMPFIRE_REGENERATION_AMPLIFIER);
-                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, duration, amplifier, true, true));
+                    GameRules gameRules = level.getGameRules();
+                    int duration = gameRules.get(SoothingCampfires.CAMPFIRE_REGENERATION_DURATION);
+                    int amplifier = gameRules.get(SoothingCampfires.CAMPFIRE_REGENERATION_AMPLIFIER);
+                    player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, amplifier, true, true));
                 }
             }
         }
+    }
+
+    @Unique
+    private static AABB getEffectArea(ServerLevel level, BlockPos pos) {
+        boolean isSignal = level.getBlockState(pos.below()).is(Blocks.HAY_BLOCK);
+        GameRules gameRules = level.getGameRules();
+        int radius = gameRules.get(isSignal ? SoothingCampfires.CAMPFIRE_REGENERATION_RADIUS_SIGNAL : SoothingCampfires.CAMPFIRE_REGENERATION_RADIUS);
+        BoundingBox boundingBox = new BoundingBox(pos).inflatedBy(radius);
+        return AABB.of(boundingBox);
     }
 }
